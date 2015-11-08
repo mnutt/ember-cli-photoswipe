@@ -17,9 +17,9 @@ export default Em.Component.extend({
 
       /**
        * DEPRECATED
-       * 
-       * Code exists for backward compatability of block usage 
-       * up to ember-cli-photoswipe versions 1.0.1. 
+       *
+       * Code exists for backward compatability of block usage
+       * up to ember-cli-photoswipe versions 1.0.1.
        */
       if (this.get('items')) {
         return this._initItemGallery();
@@ -46,13 +46,50 @@ export default Em.Component.extend({
   },
 
   _initItemGallery: function() {
-    this.set('gallery', new PhotoSwipe(
-      this.get('pswpEl'),
-      this.get('pswpTheme'),
-      this.get('items'),
-      this.get('options')
+    var component = this;
+
+    component.get('items').forEach(function(item) {
+      if(!item.w || !item.h) {
+        item.w = 1;
+        item.h = 1;
+        item.dynamic = true;
+      }
+    });
+
+    component.set('gallery', new PhotoSwipe(
+      component.get('pswpEl'),
+      component.get('pswpTheme'),
+      component.get('items'),
+      component.get('options')
     ));
-    this._reInitOnClose();
+
+    component.get('gallery').listen('gettingData', function(index, item) {
+      component._setItemDimensions(item).then(function(loaded) {
+        component.get('gallery').updateSize();
+      });
+    });
+
+    component._reInitOnClose();
+  },
+
+  _setItemDimensions: function(item) {
+    return new Em.RSVP.Promise(function(resolve, reject) {
+      if(!item.dynamic) {
+        return resolve(item);
+      }
+
+      var img = new Image();
+      img.onload = function() {
+        item.w = this.naturalWidth;
+        item.h = this.naturalHeight;
+        item.dynamic = false;
+        resolve(item);
+      };
+      img.onerror = function(err) {
+        reject(err);
+      };
+      img.src = item.src;
+    });
   },
 
   _reInitOnClose: function() {
@@ -68,13 +105,13 @@ export default Em.Component.extend({
     var component = this;
     component._initItemGallery();
   }),
-  
+
   /**
    * DEPRECATED
-   * 
-   * Code exists for backward compatability of block usage 
-   * up to ember-cli-photoswipe versions 1.0.1. 
-   */  
+   *
+   * Code exists for backward compatability of block usage
+   * up to ember-cli-photoswipe versions 1.0.1.
+   */
   click: function(evt) {
 
     if (this.get('items')) {
@@ -100,10 +137,10 @@ export default Em.Component.extend({
     );
     this.set('gallery', pSwipe);
     this.get('gallery').init();
-  }, 
+  },
   /**
    * END DEPRECATED
-   */   
+   */
 
   _getBounds: function(i) {
     var img      = this.$('img').get(i),
@@ -119,6 +156,7 @@ export default Em.Component.extend({
         var index = this.get('items').indexOf(item);
         this.set('options.index', index);
       }
+      console.log("LAUNCH GALLERY");
       var pSwipe = new PhotoSwipe(
         this.get('pswpEl'),
         this.get('pswpTheme'),
@@ -133,10 +171,10 @@ export default Em.Component.extend({
 
   /**
    * DEPRECATED
-   * 
-   * Code exists for backward compatability of block usage 
-   * up to ember-cli-photoswipe versions 1.0.1. 
-   */  
+   *
+   * Code exists for backward compatability of block usage
+   * up to ember-cli-photoswipe versions 1.0.1.
+   */
   _calculateItems: function() {
     var items           = this.$().find('a');
     var calculatedItems = Em.A(items).map(function(i, item) {
@@ -149,9 +187,9 @@ export default Em.Component.extend({
       };
     });
     this.set('calculatedItems', calculatedItems);
-  }  
+  }
   /**
    * END DEPRECATED
-   */      
+   */
 
 });
