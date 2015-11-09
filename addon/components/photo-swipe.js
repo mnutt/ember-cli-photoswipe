@@ -7,6 +7,12 @@ var run = Em.run;
 
 export default Em.Component.extend({
 
+  initGallery: function() {
+    if(this.get('enabled')) {
+      this.get('gallery').init();
+    }
+  }.observes('enabled'),
+
   onInsert: Em.on('didInsertElement', function() {
 
     Em.run.scheduleOnce('afterRender', this, function() {
@@ -64,8 +70,16 @@ export default Em.Component.extend({
     ));
 
     component.get('gallery').listen('gettingData', function(index, item) {
-      component._setItemDimensions(item).then(function(loaded) {
-        component.get('gallery').updateSize();
+      component._setItemDimensions(item).then(function(changed) {
+        if(changed) {
+          Em.run.later(component, function() {
+            var index = component.get('gallery').items.indexOf(item);
+            window.a = component.get('gallery');
+            component.get('gallery').lazyLoadItem(index);
+            component.get('gallery').invalidateCurrItems();
+            component.get('gallery').updateSize(true);
+          });
+        }
       });
     });
 
@@ -75,7 +89,7 @@ export default Em.Component.extend({
   _setItemDimensions: function(item) {
     return new Em.RSVP.Promise(function(resolve, reject) {
       if(!item.dynamic) {
-        return resolve(item);
+        return resolve(false);
       }
 
       var img = new Image();
@@ -83,18 +97,19 @@ export default Em.Component.extend({
         item.w = this.naturalWidth;
         item.h = this.naturalHeight;
         item.dynamic = false;
-        resolve(item);
+        resolve(true);
       };
       img.onerror = function(err) {
         reject(err);
       };
-      img.src = item.src;
+      img.src = item.src + '?' + Math.random();
     });
   },
 
   _reInitOnClose: function() {
     var component = this;
     this.get('gallery').listen('close', function() {
+      component.set('enabled', false);
       run.next(function() {
         component._initItemGallery();
       });
@@ -156,7 +171,7 @@ export default Em.Component.extend({
         var index = this.get('items').indexOf(item);
         this.set('options.index', index);
       }
-      console.log("LAUNCH GALLERY");
+
       var pSwipe = new PhotoSwipe(
         this.get('pswpEl'),
         this.get('pswpTheme'),
