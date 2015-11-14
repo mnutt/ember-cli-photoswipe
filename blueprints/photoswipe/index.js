@@ -2,7 +2,7 @@
 
 var fs    = require('fs');
 
-var PHOTOSWIPE_VERSION = '4.1.0';
+var PHOTOSWIPE_VERSION = 'git://github.com/dimsemenov/PhotoSwipe.git#1a061a682cf4f';
 
 module.exports = {
 

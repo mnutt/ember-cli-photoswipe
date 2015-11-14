@@ -75,8 +75,6 @@ export default Em.Component.extend({
           Em.run.later(component, function() {
             var index = component.get('gallery').items.indexOf(item);
             window.a = component.get('gallery');
-            component.get('gallery').lazyLoadItem(index);
-            component.get('gallery').invalidateCurrItems();
             component.get('gallery').updateSize(true);
           });
         }
