@@ -100,7 +100,7 @@ export default Em.Component.extend({
       img.onerror = function(err) {
         reject(err);
       };
-      img.src = item.src + '?' + Math.random();
+      img.src = item.src;
     });
   },
 
