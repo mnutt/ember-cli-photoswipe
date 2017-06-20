@@ -21,16 +21,16 @@ export default Em.Component.extend({
 
       this._buildOptions();
 
-      /**
-       * DEPRECATED
-       *
-       * Code exists for backward compatability of block usage
-       * up to ember-cli-photoswipe versions 1.0.1.
-       */
       if (this.get('items')) {
         return this._initItemGallery();
       }
-      console.log("WARNING: See https://github.com/poetic/ember-cli-photoswipe#usage");
+
+      /**
+       * DEPRECATED
+       *
+       * Code exists for backward compatibility of block usage
+       * up to ember-cli-photoswipe versions 1.0.1.
+       */
       return this._calculateItems();
       /**
        * END DEPRECATED
@@ -122,7 +122,7 @@ export default Em.Component.extend({
   /**
    * DEPRECATED
    *
-   * Code exists for backward compatability of block usage
+   * Code exists for backward compatibility of block usage
    * up to ember-cli-photoswipe versions 1.0.1.
    */
   click: function(evt) {
@@ -185,10 +185,17 @@ export default Em.Component.extend({
   /**
    * DEPRECATED
    *
-   * Code exists for backward compatability of block usage
+   * Code exists for backward compatibility of block usage
    * up to ember-cli-photoswipe versions 1.0.1.
    */
   _calculateItems: function() {
+    Em.deprecate(
+      "Using ember-cli-photoswipe without an items attribute is deprecated. "+
+      "See https://github.com/poetic/ember-cli-photoswipe#usage",
+      false,
+      {id: 'ember-cli-photoswipe.didInsertElement', until: '1.13'}
+    );
+
     var items           = this.$().find('a');
     var calculatedItems = Em.A(items).map(function(i, item) {
       return {
